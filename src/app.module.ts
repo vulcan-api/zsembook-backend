@@ -6,7 +6,6 @@ import { SpottedModule } from './spotted/spotted.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ProjectModule } from './project/project.module';
 import * as process from 'process';
-import { SchoolModule } from './school/school.module';
 import { UserModule } from './user/user.module';
 import { OlympicsModule } from './olympics/olympics.module';
 
@@ -34,7 +33,6 @@ import { OlympicsModule } from './olympics/olympics.module';
       }),
     }),
     ProjectModule,
-    SchoolModule,
     UserModule,
     OlympicsModule,
   ],
