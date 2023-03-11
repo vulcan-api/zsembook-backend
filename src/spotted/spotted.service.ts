@@ -8,15 +8,18 @@ export class SpottedService {
   constructor(private readonly prisma: DbService) {}
 
   async getPostList(
-    skip: number,
-    take: number,
     userId: number,
+    postSkip = 0,
+    postTake = 999,
+    commentSkip = 999,
+    commentTake = 999,
+    maxRepliesNesting = 2,
   ): Promise<any[]> {
     const { prisma } = this;
 
     const spottedPosts = await prisma.spottedPost.findMany({
-      skip,
-      take,
+      skip: postSkip,
+      take: postTake,
       orderBy: {
         createdAt: 'desc',
       },
@@ -28,11 +31,17 @@ export class SpottedService {
         isAnonymous: true,
         author: {
           select: {
-            username: true,
             id: true,
+            username: true,
           },
         },
-        Comment: true,
+        Comment: {
+          skip: commentSkip,
+          take: commentTake,
+          orderBy: {
+            parentId: 'asc',
+          },
+        },
         SpottedLikes: true,
       },
     });
@@ -45,14 +54,23 @@ export class SpottedService {
       post.isLiked = post.SpottedLikes.some(
         (like: any) => like.userId === userId,
       );
-      post.comments = this.nestReplies(post.Comment);
+      post.comments = this.nestReplies(
+        post.Comment,
+        undefined,
+        maxRepliesNesting,
+      );
       delete post.Comment;
-      console.log(post.comments);
       return post;
     });
   }
 
-  private nestReplies(comments: any[], parentId?: number): object | null {
+  private nestReplies(
+    comments: any[],
+    parentId?: number,
+    nestingLeft?: number,
+  ): object | null {
+    if (nestingLeft) if (nestingLeft-- === 0) return null;
+
     let processingComments: any[];
     if (!parentId) {
       processingComments = comments.filter((comment) => !comment.parentId);
@@ -80,35 +98,50 @@ export class SpottedService {
   }
 
   async getUsersPosts(skip: number, take: number, userId: number) {
-    const { prisma } = this;
-
-    const spottedPosts: any[] = await prisma.$queryRaw`
-        SELECT s.id,
-       "createdAt",
-       title,
-       text,
-       u.username,
-       "isAnonymous",
-       (SELECT count(l) FROM "SpottedLikes" l WHERE l."postId" = s.id) AS "likes",
-       (SELECT count(l) FROM "SpottedLikes" l WHERE l."postId" = s.id AND l."userId" = ${userId}) AS "isLiked"
-            FROM "SpottedPost" s 
-            LEFT JOIN "SpottedLikes" l ON s.id = l."postId" 
-            LEFT JOIN "User" u ON s."authorId" = u.id 
-            WHERE "isAnonymous" = false AND s."authorId" = ${userId}
-            ORDER BY s."createdAt" desc
-            OFFSET ${skip} LIMIT ${take}`;
-
+    const spottedPosts = await this.prisma.spottedPost.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        title: true,
+        text: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        _count: {
+          select: { SpottedLikes: true },
+        },
+        SpottedLikes: {
+          select: { userId: true },
+        },
+      },
+      where: {
+        isAnonymous: false,
+        authorId: userId,
+      },
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
+      skip,
+      take,
+    });
     return spottedPosts.map((post: any) => {
-      post.likes = parseInt(post.likes);
-      post.isLiked = Boolean(parseInt(post.isLiked));
+      post.isLiked = post.SpottedLikes.some(
+        (like: { userId: number }) => like.userId === userId,
+      );
+      post.likes = post._count.SpottedLikes;
+      delete post.SpottedLikes;
+      delete post._count;
       return post;
     });
   }
 
   async getPostById(postId: number, userId: number): Promise<any> {
-    const { prisma } = this;
-
-    const spottedPosts: any[] = await prisma.$queryRaw`
+    /*const spottedPosts: any[] = await prisma.$queryRaw`
         SELECT s.id,
        "createdAt",
        title,
@@ -119,13 +152,42 @@ export class SpottedService {
        (SELECT count(l) FROM "SpottedLikes" l WHERE l."postId" = s.id AND l."userId" = ${userId}) AS "isLiked"
             FROM "SpottedPost" s LEFT JOIN "SpottedLikes" l ON s.id = l."postId"
             WHERE s.id = ${postId}
-            ORDER BY s."createdAt" desc`;
+            ORDER BY s."createdAt" desc`; */
 
-    return spottedPosts.map((post: any) => {
-      post.likes = parseInt(post.likes);
-      post.isLiked = Boolean(parseInt(post.isLiked));
-      return post;
-    })[0];
+    const spottedPost: { [key: string]: any } =
+      await this.prisma.spottedPost.findUniqueOrThrow({
+        where: {
+          id: postId,
+        },
+        select: {
+          id: true,
+          createdAt: true,
+          title: true,
+          text: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+          isAnonymous: true,
+          _count: {
+            select: { SpottedLikes: true },
+          },
+          SpottedLikes: {
+            select: { userId: true },
+          },
+        },
+      });
+
+    spottedPost.likes = spottedPost._count.SpottedLikes;
+    spottedPost.isLiked = spottedPost.SpottedLikes.some(
+      (like: { userId: number }) => like.userId === userId,
+    );
+    delete spottedPost._count;
+    delete spottedPost.SpottedLikes;
+
+    return spottedPost;
   }
 
   async insertNewPost(postData: InsertPostDto, authorId: number) {
@@ -138,7 +200,6 @@ export class SpottedService {
     newPostData: UpdatePostDto | { id?: number },
     userId: number,
   ) {
-    console.log('newPostData: ', newPostData);
     const { id } = newPostData;
     delete newPostData.id;
 
@@ -169,28 +230,6 @@ export class SpottedService {
   async removeLike(postId: number, userId: number) {
     await this.prisma.spottedLikes.deleteMany({
       where: { postId, userId },
-    });
-  }
-
-  async addComment(
-    postId: number,
-    userId: number,
-    text: string,
-    commentId?: number,
-  ): Promise<void> {
-    await this.prisma.comment.create({
-      data: {
-        authorId: userId,
-        postId,
-        text,
-        parentId: commentId,
-      },
-    });
-  }
-
-  async deleteComment(commentId: number, userId: number): Promise<void> {
-    await this.prisma.comment.deleteMany({
-      where: { id: commentId, authorId: userId },
     });
   }
 
