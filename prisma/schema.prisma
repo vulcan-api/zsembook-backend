@@ -40,16 +40,11 @@ model User {
   Comment        Comment[]
   Followers      Follows[]        @relation("following")
   Following      Follows[]        @relation("follower")
-  GroupAdmin     GroupAdmin[]
-  GroupMember    GroupMember[]
-  GroupPost      GroupPost[]
   report         Report[]
-  SpottedComment SpottedComment[]
   SpottedLikes   SpottedLikes[]
   spottedPost    SpottedPost[]
   UnverifiedUser UnverifiedUser[]
   restURL        RestURL?         @relation(fields: [restURLId], references: [id])
-  UserPost       UserPost[]
   userSkills     UserSkils[]
   Olympics       Olympics[]       @relation("OlympicsToUser")
   facebookId     String?          @unique
@@ -101,7 +96,6 @@ model SpottedPost {
   isAnonymous    Boolean
   Comment        Comment[]
   Report         Report[]
-  SpottedComment SpottedComment[]
   SpottedLikes   SpottedLikes[]
   author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
@@ -131,10 +125,8 @@ model Report {
   spottedPostId Int?
   groupPostId   Int?
   userPostId    Int?
-  GroupPost     GroupPost?   @relation(fields: [groupPostId], references: [id])
   spottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
-  UserPost      UserPost?    @relation(fields: [userPostId], references: [id])
 }
 
 model Comment {
@@ -149,50 +141,6 @@ model Comment {
   post     SpottedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
-model Group {
-  Id          Int           @id @default(autoincrement())
-  name        String
-  createdAt   DateTime      @default(now())
-  GroupAdmin  GroupAdmin[]
-  GroupMember GroupMember[]
-}
-
-model GroupAdmin {
-  Id      Int    @id @default(autoincrement())
-  groupId Int?
-  userId  Int
-  group   Group? @relation(fields: [groupId], references: [Id])
-  user    User   @relation(fields: [userId], references: [id])
-}
-
-model GroupMember {
-  Id      Int    @id @default(autoincrement())
-  groupId Int?
-  userId  Int
-  group   Group? @relation(fields: [groupId], references: [Id])
-  user    User   @relation(fields: [userId], references: [id])
-}
-
-model GroupPost {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  title     String
-  text      String
-  authorId  Int
-  author    User     @relation(fields: [authorId], references: [id])
-  Report    Report[]
-}
-
-model UserPost {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  title     String
-  text      String
-  authorId  Int
-  Report    Report[]
-  author    User     @relation(fields: [authorId], references: [id])
-}
-
 model Olympics {
   id              Int      @id @default(autoincrement())
   registrationEnd DateTime
@@ -203,15 +151,6 @@ model Olympics {
   prizePool       Int
   organisators    String[]
   participants    User[]   @relation("OlympicsToUser")
-}
-
-model SpottedComment {
-  Id            Int          @id @default(autoincrement())
-  userId        Int
-  spottedPostId Int?
-  createdAt     DateTime     @default(now())
-  SpottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id])
-  User          User         @relation(fields: [userId], references: [id])
 }
 
 model Faq {
