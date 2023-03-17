@@ -1,6 +1,6 @@
 import { IsInt, IsOptional, IsPositive } from 'class-validator';
 
-export class GetAllProjectsDto {
+export class GetAllEventsDto {
   @IsOptional()
   @IsPositive()
   @IsInt()

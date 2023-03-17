@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { OlympicsModule } from './olympics/olympics.module';
 import { OauthModule } from './oauth/oauth.module';
 import { FaqModule } from './faq/faq.module';
+import { SchoolEventModule } from './school-event/school-event.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { FaqModule } from './faq/faq.module';
     OlympicsModule,
     OauthModule,
     FaqModule,
+    SchoolEventModule,
   ],
 })
 export class AppModule {}
