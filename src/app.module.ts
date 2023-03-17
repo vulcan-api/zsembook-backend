@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { DbModule } from './db/db.module';
 import { SpottedModule } from './spotted/spotted.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { ProjectModule } from './project/project.module';
 import * as process from 'process';
 import { UserModule } from './user/user.module';
 import { OlympicsModule } from './olympics/olympics.module';
@@ -35,7 +34,6 @@ import { SchoolEventModule } from './school-event/school-event.module';
         },
       }),
     }),
-    ProjectModule,
     UserModule,
     OlympicsModule,
     OauthModule,

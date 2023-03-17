@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { SpottedService } from '../spotted/spotted.service';
-import { ProjectService } from '../project/project.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/getUser.decorator';
 import { JwtAuthDto } from '../auth/dto/jwt-auth.dto';
@@ -19,7 +18,6 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly spottedService: SpottedService,
-    private readonly projectService: ProjectService,
   ) {}
 
   @Get()
@@ -41,8 +39,4 @@ export class UserController {
     return this.spottedService.getUsersPosts(0, 999, userId);
   }
 
-  @Get('/:userId/projects')
-  async getProjects(@Param('userId') userId: string) {
-    return this.projectService.getUserProjects(parseInt(userId));
-  }
 }
