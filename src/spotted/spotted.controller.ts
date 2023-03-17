@@ -19,8 +19,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/getUser.decorator';
 import { JwtAuthDto } from '../auth/dto/jwt-auth.dto';
 import { ReportDto } from './dto/report.dto';
-import { CommentDto } from './comment/dto/comment.dto';
-import { take } from 'rxjs';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('spotted')
@@ -68,16 +66,17 @@ export class SpottedController {
     @Body() body: UpdatePostDto,
     @GetUser() user: JwtAuthDto,
   ): Promise<object> {
-    await this.spottedService.changePostById(body, user.userId);
+    await this.spottedService.changePostById(body, user.userId, user.role);
     return { ok: true, statusCode: 200 };
   }
 
-  @Delete('/post')
+  @Delete('/post/:id')
   async deletePost(
-    @Body('id') id: number,
+    @Param('id') id: number,
     @GetUser() user: JwtAuthDto,
   ): Promise<object> {
-    await this.spottedService.deletePostById(id, user.userId);
+    if (!id) throw new Error('No post id provided');
+    await this.spottedService.deletePostById(id, user.userId, user.role);
     return { ok: true, statusCode: 200 };
   }
 

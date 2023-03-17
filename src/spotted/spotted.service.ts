@@ -141,19 +141,6 @@ export class SpottedService {
   }
 
   async getPostById(postId: number, userId: number): Promise<any> {
-    /*const spottedPosts: any[] = await prisma.$queryRaw`
-        SELECT s.id,
-       "createdAt",
-       title,
-       text,
-       "authorId",
-       "isAnonymous",
-       (SELECT count(l) FROM "SpottedLikes" l WHERE l."postId" = s.id) AS "likes",
-       (SELECT count(l) FROM "SpottedLikes" l WHERE l."postId" = s.id AND l."userId" = ${userId}) AS "isLiked"
-            FROM "SpottedPost" s LEFT JOIN "SpottedLikes" l ON s.id = l."postId"
-            WHERE s.id = ${postId}
-            ORDER BY s."createdAt" desc`; */
-
     const spottedPost: { [key: string]: any } =
       await this.prisma.spottedPost.findUniqueOrThrow({
         where: {
@@ -184,6 +171,7 @@ export class SpottedService {
     spottedPost.isLiked = spottedPost.SpottedLikes.some(
       (like: { userId: number }) => like.userId === userId,
     );
+    spottedPost.isOwned = spottedPost.author.id === userId;
     delete spottedPost._count;
     delete spottedPost.SpottedLikes;
 
@@ -199,17 +187,24 @@ export class SpottedService {
   async changePostById(
     newPostData: UpdatePostDto | { id?: number },
     userId: number,
+    role?: string,
   ) {
     const { id } = newPostData;
     delete newPostData.id;
-
+    if (role === 'MODERATOR')
+      await this.prisma.spottedPost.updateMany({
+        data: newPostData,
+        where: { id },
+      });
     await this.prisma.spottedPost.updateMany({
       data: newPostData,
       where: { id, authorId: userId },
     });
   }
 
-  async deletePostById(id: number, userId: number) {
+  async deletePostById(id: number, userId: number, role?: string) {
+    if (role === 'MODERATOR')
+      await this.prisma.spottedPost.deleteMany({ where: { id } });
     await this.prisma.spottedPost.deleteMany({
       where: { id, authorId: userId },
     });

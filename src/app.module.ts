@@ -8,6 +8,8 @@ import { ProjectModule } from './project/project.module';
 import * as process from 'process';
 import { UserModule } from './user/user.module';
 import { OlympicsModule } from './olympics/olympics.module';
+import { OauthModule } from './oauth/oauth.module';
+import { FaqModule } from './faq/faq.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { OlympicsModule } from './olympics/olympics.module';
     ProjectModule,
     UserModule,
     OlympicsModule,
+    OauthModule,
+    FaqModule,
   ],
 })
 export class AppModule {}

@@ -29,8 +29,6 @@ export class AuthService {
         surname: dto.surname,
         passwordHash: sha512(dto.password),
         profileDesc: '',
-        postsProjects: '',
-        profileSettings: '',
         email: dto.email,
       },
     });
@@ -64,7 +62,7 @@ export class AuthService {
     });
 
     if (sha512(dto.password) === user.passwordHash) {
-      return this.generateAuthCookie({ userId: user.id });
+      return this.generateAuthCookie({ userId: user.id, role: user.role });
     }
     throw new ForbiddenException('Wrong credentials!');
   }
@@ -101,9 +99,10 @@ export class AuthService {
   }
 
   async generateAuthCookie(
-    payload: JwtAuthDto,
+    payload: Omit<JwtAuthDto, 'role'> & { role?: string },
   ): Promise<[string, string, object]> {
-    const jwt = await this.generateAuthJwt(payload);
+    if (payload.role === undefined) payload.role = 'USER';
+    const jwt = await this.generateAuthJwt(payload as JwtAuthDto);
     return ['jwt', jwt, { secure: true }];
   }
 
@@ -126,6 +125,7 @@ export class AuthService {
             Following: true,
           },
         },
+        role: true,
       },
     });
     if (!userPublicInfo) return null;

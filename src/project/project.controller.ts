@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -40,8 +41,11 @@ export class ProjectController {
   }
 
   @Get('/:id')
-  getProject(@Param('id') id: string): object {
-    return this.projectService.getProjectById(parseInt(id));
+  getProject(
+    @Param('id', ParseIntPipe) postId: number,
+    @GetUser() user: JwtAuthDto,
+  ): object {
+    return this.projectService.getProjectById(postId, user.userId);
   }
 
   @Get('/:id/participants')
@@ -72,9 +76,10 @@ export class ProjectController {
     return { body, statusCode: 200 };
   }
 
-  @Delete()
-  async deleteProject(@Body('id') id: number) {
-    await this.projectService.deleteProjectById(id);
+  @Delete('/:id')
+  async deleteProject(@Param('id') id: number, @GetUser() user: JwtAuthDto) {
+    await this.projectService.deleteProjectById(id, user.userId);
+    return { ok: true, statusCode: 204 };
   }
 
   @Post('/report')
