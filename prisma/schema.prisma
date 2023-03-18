@@ -37,7 +37,10 @@ model User {
   youtube        String?
   userId         Int?
   role           Role             @default(USER)
+  facebookId     String?          @unique
+  googleId       String?          @unique
   Comment        Comment[]
+  Faq            Faq[]
   Followers      Follows[]        @relation("following")
   Following      Follows[]        @relation("follower")
   report         Report[]
@@ -47,8 +50,6 @@ model User {
   restURL        RestURL?         @relation(fields: [restURLId], references: [id])
   userSkills     UserSkils[]
   Olympics       Olympics[]       @relation("OlympicsToUser")
-  facebookId     String?          @unique
-  Faq            Faq[]
 }
 
 model Follows {
