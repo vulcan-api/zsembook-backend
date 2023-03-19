@@ -117,7 +117,6 @@ export class AuthService {
         name: true,
         surname: true,
         username: true,
-        class_name: true,
         profileDesc: true,
         _count: {
           select: {

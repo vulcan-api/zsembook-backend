@@ -13,7 +13,6 @@ export class UserService {
           name: true,
           surname: true,
           username: true,
-          class_name: true,
           profileDesc: true,
           email: true,
           Followers: true,
