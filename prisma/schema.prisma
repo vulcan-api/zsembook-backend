@@ -18,19 +18,11 @@ model User {
   name           String?
   username       String           @unique
   surname        String?
-  class_name     String?
   passwordHash   String
   profileDesc    String
-  loginID        Int?
   email          String           @unique
-  restURLId      Int?
-  certificate    String?
-  fingerprint    String?
-  privateKey     String?
-  firebaseToken  String?
   isVerified     Boolean          @default(false)
   avatar         Bytes?
-  darkTheme      Boolean          @default(false)
   facebook       String?
   instagram      String?
   website        String?
@@ -47,7 +39,6 @@ model User {
   SpottedLikes   SpottedLikes[]
   spottedPost    SpottedPost[]
   UnverifiedUser UnverifiedUser[]
-  restURL        RestURL?         @relation(fields: [restURLId], references: [id])
   userSkills     UserSkils[]
   Olympics       Olympics[]       @relation("OlympicsToUser")
 }
@@ -82,23 +73,17 @@ model UnverifiedUser {
   user   User   @relation(fields: [userId], references: [id])
 }
 
-model RestURL {
-  id    Int    @id @default(autoincrement())
-  url   String @unique
-  users User[]
-}
-
 model SpottedPost {
-  id             Int              @id @default(autoincrement())
-  createdAt      DateTime         @default(now())
-  title          String
-  text           String
-  authorId       Int
-  isAnonymous    Boolean
-  Comment        Comment[]
-  Report         Report[]
-  SpottedLikes   SpottedLikes[]
-  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  id           Int            @id @default(autoincrement())
+  createdAt    DateTime       @default(now())
+  title        String
+  text         String
+  authorId     Int
+  isAnonymous  Boolean
+  Comment      Comment[]
+  Report       Report[]
+  SpottedLikes SpottedLikes[]
+  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
 model SpottedLikes {
@@ -110,11 +95,12 @@ model SpottedLikes {
 
   @@unique([userId, postId])
 }
+
 model SchoolEvent {
-  id          Int           @id @default(autoincrement())
-  date   DateTime      @default(now())
-  title       String
-  text        String
+  id    Int      @id @default(autoincrement())
+  date  DateTime @default(now())
+  title String
+  text  String
 }
 
 model Report {
