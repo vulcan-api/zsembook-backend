@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -20,7 +21,6 @@ import { GetUser } from '../auth/decorator/getUser.decorator';
 import { JwtAuthDto } from '../auth/dto/jwt-auth.dto';
 import { ReportDto } from './dto/report.dto';
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('spotted')
 export class SpottedController {
   constructor(private readonly spottedService: SpottedService) {}
@@ -35,7 +35,7 @@ export class SpottedController {
     @GetUser() user: JwtAuthDto,
   ): Promise<object> {
     return this.spottedService.getPostList(
-      user.userId,
+      user ? user.userId : undefined,
       +postSkip,
       +postTake,
       +skipComment,
@@ -46,12 +46,13 @@ export class SpottedController {
 
   @Get('/post/:id')
   getSpecificPost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @GetUser() user: JwtAuthDto,
   ): object {
-    return this.spottedService.getPostById(parseInt(id), user.userId);
+    return this.spottedService.getPostById(id, user ? user.userId : undefined);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put('/post')
   async addNewSpottedPost(
     @Body() body: InsertPostDto,
@@ -61,6 +62,7 @@ export class SpottedController {
     return { ok: true, statusCode: 200 };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch('/post')
   async changePostData(
     @Body() body: UpdatePostDto,
@@ -70,6 +72,7 @@ export class SpottedController {
     return { ok: true, statusCode: 200 };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete('/post/:id')
   async deletePost(
     @Param('id') id: number,
@@ -80,6 +83,7 @@ export class SpottedController {
     return { ok: true, statusCode: 200 };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post/:id/like')
   async giveALike(
     @Param('id') id: number,
@@ -89,6 +93,7 @@ export class SpottedController {
     return { ok: true, statusCode: 200 };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/post/:id/unlike')
   async removeLike(
     @Param('id') postId: number,
@@ -98,6 +103,7 @@ export class SpottedController {
     return { ok: true, statusCode: 200 };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('/report')
   @HttpCode(HttpStatus.CREATED)
   async reportPost(

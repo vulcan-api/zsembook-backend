@@ -9,7 +9,7 @@ export class SpottedService {
   constructor(private readonly prisma: DbService) {}
 
   async getPostList(
-    userId: number,
+    userId: number | undefined,
     postSkip = 0,
     postTake = 999,
     commentSkip = 999,
@@ -141,7 +141,7 @@ export class SpottedService {
     });
   }
 
-  async getPostById(postId: number, userId: number): Promise<any> {
+  async getPostById(postId: number, userId: number | undefined): Promise<any> {
     const spottedPost: { [key: string]: any } =
       await this.prisma.spottedPost.findUniqueOrThrow({
         where: {
