@@ -101,6 +101,8 @@ model SchoolEvent {
   date  DateTime @default(now())
   title String
   text  String
+  facebook String?
+  website String?
 }
 
 model Report {

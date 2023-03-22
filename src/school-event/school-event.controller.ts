@@ -13,7 +13,7 @@ export class SchoolEventController {
   }
 
   @Get('/:id')
-  getProject(
+  getEvent(
     @Param('id', ParseIntPipe) eventId: number
   ): object {
     return this.schoolEventService.getEventById(eventId);

@@ -43,7 +43,10 @@ export class SpottedController {
       +maxRepliesNesting,
     );
   }
-
+  @Get('/count')
+  getPostsCount(): Promise<number> {
+    return this.spottedService.getPostsCount();
+  }
   @Get('/post/:id')
   getSpecificPost(
     @Param('id', ParseIntPipe) id: number,

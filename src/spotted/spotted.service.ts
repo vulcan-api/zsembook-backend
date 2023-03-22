@@ -97,7 +97,9 @@ export class SpottedService {
     if (!Object.keys(answer).length) return null;
     return answer;
   }
-
+  async getPostsCount() {
+    return await this.prisma.spottedPost.count();
+  }
   async getUsersPosts(skip: number, take: number, userId: number) {
     const spottedPosts = await this.prisma.spottedPost.findMany({
       select: {
