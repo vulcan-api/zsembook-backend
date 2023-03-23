@@ -27,5 +27,5 @@ jobs:
         cache: 'pnpm'
     - run: pnpm i
     - run: pnpm build:prod
-    - run: pm2 restart main
+    - run: pm2 restart rekrutacja-backend
     - run: echo "${{secrets.ENV}}" > .env
