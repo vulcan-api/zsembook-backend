@@ -1,4 +1,4 @@
-# BasedBook backend
+# ZSEMBook backend
 ![](https://img.shields.io/github/actions/workflow/status/nasz-elektryk/basedbook-backend/tests.yml?logo=github-actions&logoColor=white&style=for-the-badge)
 ![](https://img.shields.io/github/license/nasz-elektryk/basedbook-backend?logo=gnu&style=for-the-badge)
 ![](https://img.shields.io/github/package-json/v/nasz-elektryk/basedbook-backend?color=yellow&logo=pnpm&logoColor=white&style=for-the-badge)
