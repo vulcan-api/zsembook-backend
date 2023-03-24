@@ -18,11 +18,19 @@ model User {
   name           String?
   username       String           @unique
   surname        String?
+  class_name     String?
   passwordHash   String
   profileDesc    String
+  loginID        Int?
   email          String           @unique
+  restURLId      Int?
+  certificate    String?
+  fingerprint    String?
+  privateKey     String?
+  firebaseToken  String?
   isVerified     Boolean          @default(false)
   avatar         Bytes?
+  darkTheme      Boolean          @default(false)
   facebook       String?
   instagram      String?
   website        String?
@@ -31,14 +39,21 @@ model User {
   role           Role             @default(USER)
   facebookId     String?          @unique
   googleId       String?          @unique
+  newsLetter     Boolean          @default(false)
   Comment        Comment[]
   Faq            Faq[]
   Followers      Follows[]        @relation("following")
-  Following      Follows[]        @relation("follower")
+  GroupAdmin     GroupAdmin[]
+  GroupMember    GroupMember[]
+  GroupPost      GroupPost[]
+  project        Project[]
   report         Report[]
   SpottedLikes   SpottedLikes[]
   spottedPost    SpottedPost[]
   UnverifiedUser UnverifiedUser[]
+  restURL        RestURL?         @relation(fields: [restURLId], references: [id])
+  UserPost       UserPost[]
+  UserProject    UserProject[]
   userSkills     UserSkils[]
   Olympics       Olympics[]       @relation("OlympicsToUser")
 }
@@ -46,8 +61,8 @@ model User {
 model Follows {
   followerId  Int
   followingId Int
-  follower    User @relation("follower", fields: [followerId], references: [id])
-  following   User @relation("following", fields: [followingId], references: [id])
+  follower    User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
 }
@@ -57,8 +72,8 @@ model UserSkils {
   skillId  Int
   userId   Int
   skillLvl enumSkillLvl
-  skill    Skills       @relation(fields: [skillId], references: [id])
-  user     User         @relation(fields: [userId], references: [id])
+  skill    Skills       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Skills {
@@ -70,7 +85,13 @@ model Skills {
 model UnverifiedUser {
   tempId String @id
   userId Int
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RestURL {
+  id    Int    @id @default(autoincrement())
+  url   String @unique
+  users User[]
 }
 
 model SpottedPost {
@@ -116,6 +137,7 @@ model Report {
   userPostId    Int?
   spottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
+  UserPost      UserPost?    @relation(fields: [userPostId], references: [id])
 }
 
 model Comment {
@@ -130,6 +152,50 @@ model Comment {
   post     SpottedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
+model Group {
+  Id          Int           @id @default(autoincrement())
+  name        String
+  createdAt   DateTime      @default(now())
+  GroupAdmin  GroupAdmin[]
+  GroupMember GroupMember[]
+}
+
+model GroupAdmin {
+  Id      Int    @id @default(autoincrement())
+  groupId Int?
+  userId  Int
+  group   Group? @relation(fields: [groupId], references: [Id])
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model GroupMember {
+  Id      Int    @id @default(autoincrement())
+  groupId Int?
+  userId  Int
+  group   Group? @relation(fields: [groupId], references: [Id])
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model GroupPost {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  title     String
+  text      String
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  Report    Report[]
+}
+
+model UserPost {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  title     String
+  text      String
+  authorId  Int
+  Report    Report[]
+  author    User     @relation(fields: [authorId], references: [id])
+}
+
 model Olympics {
   id              Int      @id @default(autoincrement())
   registrationEnd DateTime
@@ -142,14 +208,28 @@ model Olympics {
   participants    User[]   @relation("OlympicsToUser")
 }
 
+model SpottedComment {
+  Id            Int          @id @default(autoincrement())
+  userId        Int
+  spottedPostId Int?
+  createdAt     DateTime     @default(now())
+  SpottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id], onDelete: Cascade)
+  User          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Faq {
   id         Int     @id @default(autoincrement())
   question   String
   answer     String?
   isAnswered Boolean @default(false)
-  askerId    Int
+  askerId    Int?
   hierarchy  Int     @default(0)
-  asker      User    @relation(fields: [askerId], references: [id])
+  asker      User?   @relation(fields: [askerId], references: [id], onDelete: SetNull)
+}
+
+enum Role {
+  USER
+  MODERATOR
 }
 
 enum enumSkillLvl {

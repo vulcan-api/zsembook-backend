@@ -66,4 +66,11 @@ export class UserService {
       },
     });
   }
+
+  async deleteAccount(userId: number) {
+    if (!userId) throw new Error('UserId required');
+    await this.prisma.user.delete({
+      where: { id: userId },
+    });
+  }
 }
