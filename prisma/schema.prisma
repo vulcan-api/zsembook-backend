@@ -227,11 +227,6 @@ model Faq {
   asker      User?   @relation(fields: [askerId], references: [id], onDelete: SetNull)
 }
 
-enum Role {
-  USER
-  MODERATOR
-}
-
 enum enumSkillLvl {
   beginner
   intermediate
