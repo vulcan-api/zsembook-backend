@@ -18,11 +18,21 @@ export class FaqService {
     });
   }
 
-  getUnansweredQuestions(): Promise<any[]> {
+  getAllUnansweredQuestions(): Promise<any[]> {
     return this.prisma.faq.findMany({
       where: { isAnswered: false },
       orderBy: { hierarchy: 'desc' },
     });
+  }
+
+  async getUnansweredQuestions(userId: number | undefined): Promise<any[]> {
+    return this.prisma.faq.findMany({
+        where: {
+          askerId: userId,
+          isAnswered: false,
+        },
+        orderBy: { hierarchy: 'desc' },
+      });
   }
 
   async answerQuestion(questionId: number, answer: string) {

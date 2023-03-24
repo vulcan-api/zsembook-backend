@@ -18,6 +18,7 @@ import { ChangeQuestionDto } from './dto/changeQuestion.dto';
 import { HierarchyDto } from './dto/hierarchy.dto';
 import { async } from 'rxjs';
 
+// TODO: create and use FaqGuard instead of ModeratorGuard
 @Controller('faq')
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}
@@ -27,9 +28,18 @@ export class FaqController {
     return this.faqService.getAnsweredQuestions();
   }
 
+  @UseGuards(AuthGuard('jwt'), ModeratorGuard)
   @Get('unanswered')
-  getUnansweredFaq() {
-    return this.faqService.getUnansweredQuestions();
+  getAllUnansweredFaq() {
+    return this.faqService.getAllUnansweredQuestions();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('myQuestions')
+  getSpecificPost(
+    @GetUser() user: JwtAuthDto,
+  ): object {
+    return this.faqService.getUnansweredQuestions(user ? user.userId : undefined);
   }
 
   @UseGuards(AuthGuard('jwt'))
