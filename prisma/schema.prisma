@@ -42,27 +42,30 @@ model User {
   newsLetter     Boolean          @default(false)
   Comment        Comment[]
   Faq            Faq[]
+  Following      Follows[]        @relation("follower")
   Followers      Follows[]        @relation("following")
   GroupAdmin     GroupAdmin[]
   GroupMember    GroupMember[]
   GroupPost      GroupPost[]
-  project        Project[]
   report         Report[]
   SpottedLikes   SpottedLikes[]
   spottedPost    SpottedPost[]
   UnverifiedUser UnverifiedUser[]
   restURL        RestURL?         @relation(fields: [restURLId], references: [id])
   UserPost       UserPost[]
-  UserProject    UserProject[]
   userSkills     UserSkils[]
   Olympics       Olympics[]       @relation("OlympicsToUser")
+  Follows        Follows[]
+  SpottedComment SpottedComment[]
 }
 
 model Follows {
   followerId  Int
   followingId Int
-  follower    User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
-  following   User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  follower    User  @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User  @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  User        User? @relation(fields: [userId], references: [id])
+  userId      Int?
 
   @@id([followerId, followingId])
 }
@@ -95,16 +98,17 @@ model RestURL {
 }
 
 model SpottedPost {
-  id           Int            @id @default(autoincrement())
-  createdAt    DateTime       @default(now())
-  title        String
-  text         String
-  authorId     Int
-  isAnonymous  Boolean
-  Comment      Comment[]
-  Report       Report[]
-  SpottedLikes SpottedLikes[]
-  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  id             Int              @id @default(autoincrement())
+  createdAt      DateTime         @default(now())
+  title          String
+  text           String
+  authorId       Int
+  isAnonymous    Boolean
+  Comment        Comment[]
+  Report         Report[]
+  SpottedLikes   SpottedLikes[]
+  author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  SpottedComment SpottedComment[]
 }
 
 model SpottedLikes {
@@ -118,12 +122,12 @@ model SpottedLikes {
 }
 
 model SchoolEvent {
-  id    Int      @id @default(autoincrement())
-  date  DateTime @default(now())
-  title String
-  text  String
+  id       Int      @id @default(autoincrement())
+  date     DateTime @default(now())
+  title    String
+  text     String
   facebook String?
-  website String?
+  website  String?
 }
 
 model Report {
@@ -138,6 +142,7 @@ model Report {
   spottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
   UserPost      UserPost?    @relation(fields: [userPostId], references: [id])
+  GroupPost     GroupPost?   @relation(fields: [groupPostId], references: [id])
 }
 
 model Comment {
