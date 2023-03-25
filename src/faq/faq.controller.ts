@@ -16,6 +16,7 @@ import { ModeratorGuard } from '../auth/guards/moderator.guard';
 import { AnswerDto } from './dto/answer.dto';
 import { ChangeQuestionDto } from './dto/changeQuestion.dto';
 import { HierarchyDto } from './dto/hierarchy.dto';
+import { FaqGuard } from '../auth/guards/faq.guard';
 
 // TODO: create and use FaqGuard instead of ModeratorGuard
 @Controller('faq')
@@ -46,28 +47,28 @@ export class FaqController {
     return { statusCode: 201, message: 'Question added' };
   }
 
-  @UseGuards(AuthGuard('jwt'), ModeratorGuard)
+  @UseGuards(AuthGuard('jwt'), FaqGuard)
   @Post('answer')
   async answer(@Body() dto: AnswerDto) {
     await this.faqService.answerQuestion(dto.questionId, dto.answer);
     return { statusCode: 201, message: 'Question answered' };
   }
 
-  @UseGuards(AuthGuard('jwt'), ModeratorGuard)
+  @UseGuards(AuthGuard('jwt'), FaqGuard)
   @Post('changeQuestion')
   async changeQuestion(@Body() dto: ChangeQuestionDto) {
     await this.faqService.changeQuestion(dto.questionId, dto.question);
     return { statusCode: 201, message: 'Question changed' };
   }
 
-  @UseGuards(AuthGuard('jwt'), ModeratorGuard)
+  @UseGuards(AuthGuard('jwt'), FaqGuard)
   @Post('changeHierarchy')
   async changeHierarchy(@Body() dto: HierarchyDto) {
     await this.faqService.changeHierarchy(dto.questionId, dto.hierarchy);
     return { statusCode: 201, message: 'Hierarchy changed' };
   }
 
-  @UseGuards(AuthGuard('jwt'), ModeratorGuard)
+  @UseGuards(AuthGuard('jwt'), FaqGuard)
   @Delete()
   async deleteQuestion(@Body('questionId') questionId: number) {
     if (!questionId) throw new HttpException('Question id not provided', 400);
