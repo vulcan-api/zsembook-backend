@@ -20,13 +20,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/getUser.decorator';
 import { JwtAuthDto } from '../auth/dto/jwt-auth.dto';
 import { ReportDto } from './dto/report.dto';
+import { OptionalJwtGuard } from '../auth/guards/OptionalJwt.guard';
 
 @Controller('spotted')
 export class SpottedController {
   constructor(private readonly spottedService: SpottedService) {}
 
+  @UseGuards(OptionalJwtGuard)
   @Get('/post')
-  getAllPosts(
+  getAllPostsUnauthorized(
     @Query('postSkip') postSkip = '0',
     @Query('postTake') postTake = '10',
     @Query('commentSkip') skipComment = '0',
@@ -34,6 +36,7 @@ export class SpottedController {
     @Query('maxRepliesNesting') maxRepliesNesting = '2',
     @GetUser() user: JwtAuthDto,
   ): Promise<object> {
+    console.table({ user });
     return this.spottedService.getPostList(
       user ? user.userId : undefined,
       +postSkip,
@@ -47,6 +50,7 @@ export class SpottedController {
   getPostsCount(): Promise<number> {
     return this.spottedService.getPostsCount();
   }
+  @UseGuards(OptionalJwtGuard)
   @Get('/post/:id')
   getSpecificPost(
     @Param('id', ParseIntPipe) id: number,
