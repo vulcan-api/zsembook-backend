@@ -46,14 +46,18 @@ export class AuthService {
     });
 
     const emailHTML = `
-       <h1>Witaj na najlepszej platformie społecznościowej — Muj Elektryk!</h1>
-       <p><a href="http://localhost:3000/auth/verify/${tempUser.tempId}">Potwierdź konto</a></p>
+      <html lang="pl">
+        <body>
+          <h1>Witaj w systemie rekrutacja ZSEM!</h1>
+          <p><a href="https://rekrutacja.zsem.edu.pl/auth/verify/${tempUser.tempId}">Potwierdź konto</a></p>
+        </body>
+      </html>
     `;
     /* sending confirmation email */
     await this.mailerService.sendMail({
       to: dto.email,
-      from: 'noreply@basedbook.com',
-      subject: 'Potwierdzenie adresu email w serwisie BasedBook',
+      from: 'rekrutacja@sevedev.com',
+      subject: 'Potwierdzenie adresu email w serwisie rekutacyjnym ZSEM',
       html: emailHTML,
     });
 
@@ -63,10 +67,18 @@ export class AuthService {
   async login(dto: LoginDto): Promise<[string, string, object]> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { email: dto.email },
+      include: {
+        Roles: {
+          select: { role: true },
+        },
+      },
     });
 
     if (sha512(dto.password) === user.passwordHash) {
-      return this.generateAuthCookie({ userId: user.id, role: user.role });
+      return this.generateAuthCookie({
+        userId: user.id,
+        roles: user.Roles.map((e) => e.role),
+      });
     }
     throw new ForbiddenException('Wrong credentials!');
   }
@@ -103,9 +115,11 @@ export class AuthService {
   }
 
   async generateAuthCookie(
-    payload: Omit<JwtAuthDto, 'role'> & { role?: string },
+    payload: Omit<JwtAuthDto, 'roles'> & {
+      roles?: typeof JwtAuthDto.prototype.roles;
+    },
   ): Promise<[string, string, object]> {
-    if (payload.role === undefined) payload.role = 'USER';
+    if (payload.roles === undefined) payload.roles = ['USER'];
     const jwt = await this.generateAuthJwt(payload as JwtAuthDto);
     return ['jwt', jwt, { secure: true }];
   }
@@ -128,7 +142,7 @@ export class AuthService {
             Following: true,
           },
         },
-        role: true,
+        Roles: true,
       },
     });
     if (!userPublicInfo) return null;
@@ -136,32 +150,62 @@ export class AuthService {
     userPublicInfo.following = userPublicInfo._count.Following;
     delete userPublicInfo._count;
 
+    userPublicInfo.Roles = userPublicInfo.Roles.map((e: any) => e.role);
+
     return userPublicInfo;
   }
 
   async sendResetEmail(email: string): Promise<void> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: {
         email,
       },
+      select: {
+        id: true,
+      },
     });
-    if (!user) return;
     const emailContent = `
-      <h1>Aby zresetować hasło kliknij w poniższy link</h1> 
-      <a href="http://localhost:3000/auth/reset/${user.email}">Zresetuj hasło</a>
+      <html lang="pl">
+        <body>
+          <h1>Aby zresetować hasło kliknij w poniższy link</h1> 
+          <a href="https://rekrutacja.zsem.edu.pl/auth/reset/${sha512(
+            String(user.id),
+          )}">Zresetuj hasło</a>
+        </body>
+      </html>
     `;
+    const passwordResetRequest =
+      await this.prisma.passwordResetRequest.findUnique({
+        where: {
+          userId: user.id,
+        },
+      });
+    if (!passwordResetRequest) {
+      await this.prisma.passwordResetRequest.create({
+        data: {
+          userId: user.id,
+          hash: sha512(String(user.id)),
+        },
+      });
+    }
     await this.mailerService.sendMail({
       to: email,
-      from: 'noreply@basedbook.com',
-      subject: 'Zmiana hasła w serwisie BasedBook',
+      from: 'rekrutacja@sevedev.com',
+      subject: 'Zmiana hasła w serwisie rekrutacyjnym ZSEM',
       html: emailContent,
     });
   }
 
-  async resetPassword(newPassword: string, email: string): Promise<void> {
+  async resetPassword(userHash: string, newPassword: string): Promise<void> {
+    const resetRequest =
+      await this.prisma.passwordResetRequest.findUniqueOrThrow({
+        where: {
+          hash: userHash,
+        },
+      });
     await this.prisma.user.update({
       where: {
-        email,
+        id: resetRequest.userId,
       },
       data: {
         passwordHash: sha512(newPassword),

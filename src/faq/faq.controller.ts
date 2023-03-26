@@ -44,6 +44,7 @@ export class FaqController {
   @Post('ask')
   async askQuestion(@Body() dto: AddFaqDto, @GetUser() user: JwtAuthDto) {
     await this.faqService.askQuestion(dto.question, user.userId);
+    await this.faqService.sendMailAboutNewQuestion(dto.question);
     return { statusCode: 201, message: 'Question added' };
   }
 
