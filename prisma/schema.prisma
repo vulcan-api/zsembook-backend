@@ -7,65 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  MODERATOR
-  FAQ
+model User {
+  id                   Int                   @id @default(autoincrement())
+  name                 String?
+  username             String                @unique
+  surname              String?
+  class_name           String?
+  passwordHash         String
+  profileDesc          String
+  loginID              Int?
+  email                String                @unique
+  isVerified           Boolean               @default(false)
+  avatar               Bytes?
+  darkTheme            Boolean               @default(false)
+  facebook             String?
+  instagram            String?
+  website              String?
+  youtube              String?
+  userId               Int?
+  role                 Role                  @default(USER)
+  facebookId           String?               @unique
+  googleId             String?               @unique
+  newsLetter           Boolean               @default(false)
+  Comment              Comment[]
+  Faq                  Faq[]
+  Following            Follows[]             @relation("follower")
+  Followers            Follows[]             @relation("following")
+  Follows              Follows[]
+  GroupAdmin           GroupAdmin[]
+  GroupMember          GroupMember[]
+  GroupPost            GroupPost[]
+  PasswordResetRequest PasswordResetRequest?
+  report               Report[]
+  Roles                Roles[]
+  SpottedComment       SpottedComment[]
+  SpottedLikes         SpottedLikes[]
+  spottedPost          SpottedPost[]
+  UnverifiedUser       UnverifiedUser[]
+  UserPost             UserPost[]
+  userSkills           UserSkils[]
+  Olympics             Olympics[]            @relation("OlympicsToUser")
 }
 
-model User {
-  id             Int              @id @default(autoincrement())
-  name           String?
-  username       String           @unique
-  surname        String?
-  class_name     String?
-  passwordHash   String
-  profileDesc    String
-  loginID        Int?
-  email          String           @unique
-  restURLId      Int?
-  certificate    String?
-  fingerprint    String?
-  privateKey     String?
-  firebaseToken  String?
-  isVerified     Boolean          @default(false)
-  avatar         Bytes?
-  darkTheme      Boolean          @default(false)
-  facebook       String?
-  instagram      String?
-  website        String?
-  youtube        String?
-  userId         Int?
-  role           Role             @default(USER)
-  facebookId     String?          @unique
-  googleId       String?          @unique
-  newsLetter     Boolean          @default(false)
-  Comment        Comment[]
-  Faq            Faq[]
-  Following      Follows[]        @relation("follower")
-  Followers      Follows[]        @relation("following")
-  GroupAdmin     GroupAdmin[]
-  GroupMember    GroupMember[]
-  GroupPost      GroupPost[]
-  report         Report[]
-  SpottedLikes   SpottedLikes[]
-  spottedPost    SpottedPost[]
-  UnverifiedUser UnverifiedUser[]
-  restURL        RestURL?         @relation(fields: [restURLId], references: [id])
-  UserPost       UserPost[]
-  userSkills     UserSkils[]
-  Olympics       Olympics[]       @relation("OlympicsToUser")
-  Follows        Follows[]
-  SpottedComment SpottedComment[]
+model Roles {
+  id     Int  @id @default(autoincrement())
+  role   Role @default(USER)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Follows {
   followerId  Int
   followingId Int
+  userId      Int?
   follower    User  @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
   following   User  @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
   User        User? @relation(fields: [userId], references: [id])
-  userId      Int?
 
   @@id([followerId, followingId])
 }
@@ -91,12 +88,6 @@ model UnverifiedUser {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model RestURL {
-  id    Int    @id @default(autoincrement())
-  url   String @unique
-  users User[]
-}
-
 model SpottedPost {
   id             Int              @id @default(autoincrement())
   createdAt      DateTime         @default(now())
@@ -106,9 +97,9 @@ model SpottedPost {
   isAnonymous    Boolean
   Comment        Comment[]
   Report         Report[]
+  SpottedComment SpottedComment[]
   SpottedLikes   SpottedLikes[]
   author         User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  SpottedComment SpottedComment[]
 }
 
 model SpottedLikes {
@@ -139,10 +130,10 @@ model Report {
   spottedPostId Int?
   groupPostId   Int?
   userPostId    Int?
+  GroupPost     GroupPost?   @relation(fields: [groupPostId], references: [id])
   spottedPost   SpottedPost? @relation(fields: [spottedPostId], references: [id])
   user          User         @relation(fields: [userId], references: [id])
   UserPost      UserPost?    @relation(fields: [userPostId], references: [id])
-  GroupPost     GroupPost?   @relation(fields: [groupPostId], references: [id])
 }
 
 model Comment {
@@ -229,7 +220,19 @@ model Faq {
   isAnswered Boolean @default(false)
   askerId    Int?
   hierarchy  Int     @default(0)
-  asker      User?   @relation(fields: [askerId], references: [id], onDelete: SetNull)
+  asker      User?   @relation(fields: [askerId], references: [id])
+}
+
+model PasswordResetRequest {
+  hash   String @id
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  MODERATOR
+  FAQ
 }
 
 enum enumSkillLvl {

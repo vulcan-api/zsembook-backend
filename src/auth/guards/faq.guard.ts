@@ -15,9 +15,9 @@ export class FaqGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
     const user: JwtAuthDto = req.user;
-    console.log('Role: ', user.role);
+    console.log('Role: ', user.roles);
 
-    if (user.role === 'FAQ') return true;
+    if (user.roles.includes('FAQ')) return true;
     throw new HttpException(
       {
         status: HttpStatus.FORBIDDEN,
