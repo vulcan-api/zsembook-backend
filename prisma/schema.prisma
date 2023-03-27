@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -12,20 +13,16 @@ model User {
   name                 String?
   username             String                @unique
   surname              String?
-  class_name           String?
   passwordHash         String
   profileDesc          String
-  loginID              Int?
   email                String                @unique
   isVerified           Boolean               @default(false)
   avatar               Bytes?
-  darkTheme            Boolean               @default(false)
   facebook             String?
   instagram            String?
   website              String?
   youtube              String?
   userId               Int?
-  role                 Role                  @default(USER)
   facebookId           String?               @unique
   googleId             String?               @unique
   newsLetter           Boolean               @default(false)
