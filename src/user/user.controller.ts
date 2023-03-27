@@ -12,6 +12,7 @@ import { SpottedService } from '../spotted/spotted.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/getUser.decorator';
 import { JwtAuthDto } from '../auth/dto/jwt-auth.dto';
+import { OptionalJwtGuard } from '../auth/guards/OptionalJwt.guard';
 
 @Controller('/user')
 export class UserController {
@@ -26,6 +27,7 @@ export class UserController {
     return [];
   }
 
+  @UseGuards(OptionalJwtGuard)
   @Get('/:userId')
   async getPublicInformation(
     @Param('userId', ParseIntPipe) userId: number,
