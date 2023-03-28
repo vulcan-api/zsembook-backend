@@ -20,6 +20,10 @@ export class UserService {
           email: true,
           Followers: true,
           Following: true,
+          youtube: true,
+          facebook: true,
+          instagram: true,
+          website: true,
         },
       },
     );
