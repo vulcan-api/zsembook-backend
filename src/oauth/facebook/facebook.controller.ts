@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
@@ -8,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FacebookService } from './facebook.service';
-import { GetUser } from '../../auth/decorator/getUser.decorator';
 import { FacebookUser } from './facebook.strategy';
 import { AuthService } from '../../auth/auth.service';
 import { Response } from 'express';
@@ -26,7 +26,7 @@ export class FacebookController {
   }
   @Post('callback')
   async facebookCallback(
-    @GetUser() user: FacebookUser,
+    @Body() user: FacebookUser,
     @Res() response: Response,
   ): Promise<void> {
     const userId = await this.facebookService.registerFacebookUser(user);
