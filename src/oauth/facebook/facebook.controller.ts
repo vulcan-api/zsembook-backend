@@ -13,7 +13,6 @@ import { FacebookUser } from './facebook.strategy';
 import { AuthService } from '../../auth/auth.service';
 import { Response } from 'express';
 
-@UseGuards(AuthGuard('facebook'))
 @Controller('oauth/facebook')
 export class FacebookController {
   constructor(
