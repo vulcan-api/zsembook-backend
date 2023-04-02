@@ -14,6 +14,7 @@ model User {
   username             String                @unique
   surname              String?
   passwordHash         String
+  isBanned             Boolean                @default(false)
   profileDesc          String
   email                String                @unique
   isVerified           Boolean               @default(false)
@@ -212,7 +213,7 @@ model SpottedComment {
 
 model Faq {
   id         Int     @id @default(autoincrement())
-  question   String
+  question   String  @unique
   answer     String?
   isAnswered Boolean @default(false)
   askerId    Int?

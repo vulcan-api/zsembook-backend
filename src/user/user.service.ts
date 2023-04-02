@@ -77,4 +77,12 @@ export class UserService {
       where: { id: userId },
     });
   }
+
+  async banUser(userId: number) {
+    if (!userId) throw new Error("UserId shouldn't be empty");
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { isBanned: true },
+    });
+  }
 }
