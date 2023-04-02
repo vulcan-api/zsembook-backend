@@ -4,13 +4,8 @@ import { Profile, Strategy } from 'passport-facebook';
 import { ConfigService } from '@nestjs/config';
 
 export interface FacebookUser {
-  emails: {
-    value: string;
-  }[];
-  name: {
-    familyName: string;
-    givenName: string;
-  };
+  email: string;
+  name: string;
   id: string;
   accessToken: string;
 }

@@ -12,13 +12,14 @@ export class FacebookService {
       select: { id: true },
     });
     if (usr) return usr.id;
+    const [name, lastName] = user.name.split(' ');
     return (
       await this.prisma.user.create({
         data: {
-          email: user.emails[0].value,
-          name: user.name.givenName,
+          email: user.email,
+          name,
           username: await this.getRandomUsername(),
-          surname: user.name.familyName,
+          surname: lastName,
           passwordHash: '',
           profileDesc: '',
           facebookId: user.id,

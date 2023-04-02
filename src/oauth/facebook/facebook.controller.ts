@@ -1,8 +1,8 @@
 import {
   Controller,
   Get,
-  HttpCode,
   HttpStatus,
+  Post,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -25,8 +25,7 @@ export class FacebookController {
   async facebookLogin(): Promise<number> {
     return HttpStatus.OK;
   }
-  @Get('callback')
-  @HttpCode(HttpStatus.OK)
+  @Post('callback')
   async facebookCallback(
     @GetUser() user: FacebookUser,
     @Res() response: Response,
@@ -37,7 +36,12 @@ export class FacebookController {
       roles: ['USER'],
       isBanned: false,
     });
+
     response.cookie(...jwt);
+    response.cookie(
+      'user_info',
+      JSON.stringify(await this.authService.getUserPublicInfo(user.email)),
+    );
     response.send({ token: jwt[1] });
   }
 }
