@@ -39,10 +39,10 @@ export class FaqService {
     });
   }
 
-  async answerQuestion(questionId: number, answer: string) {
+  async answerQuestion(questionId: number, question: string, answer: string) {
     await this.prisma.faq.update({
       where: { id: questionId },
-      data: { answer, isAnswered: true },
+      data: { question, answer, isAnswered: true },
     });
   }
 

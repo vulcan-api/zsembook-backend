@@ -51,7 +51,11 @@ export class FaqController {
   @UseGuards(AuthGuard('jwt'), FaqGuard)
   @Post('answer')
   async answer(@Body() dto: AnswerDto) {
-    await this.faqService.answerQuestion(dto.questionId, dto.answer);
+    await this.faqService.answerQuestion(
+      dto.questionId,
+      dto.question,
+      dto.answer,
+    );
     return { statusCode: 201, message: 'Question answered' };
   }
 

@@ -9,6 +9,9 @@ import {
 export class AnswerDto {
   @IsString()
   @IsNotEmpty()
+  question: string;
+  @IsString()
+  @IsNotEmpty()
   answer: string;
 
   @IsInt()
