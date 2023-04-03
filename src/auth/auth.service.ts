@@ -54,7 +54,7 @@ export class AuthService {
       </html>
     `;
     /* sending confirmation email */
-    await this.mailerService.sendMail({
+    this.mailerService.sendMail({
       to: dto.email,
       from: 'rekrutacja@sevedev.com',
       subject: 'Potwierdzenie adresu email w serwisie rekutacyjnym ZSEM',
@@ -201,7 +201,7 @@ export class AuthService {
         },
       });
     }
-    await this.mailerService.sendMail({
+    this.mailerService.sendMail({
       to: email,
       from: 'rekrutacja@sevedev.com',
       subject: 'Zmiana hasła w serwisie rekrutacyjnym ZSEM',
