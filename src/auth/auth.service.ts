@@ -56,7 +56,7 @@ export class AuthService {
     /* sending confirmation email */
     this.mailerService.sendMail({
       to: dto.email,
-      from: 'rekrutacja@sevedev.com',
+      from: process.env.SMTP_USER,
       subject: 'Potwierdzenie adresu email w serwisie rekutacyjnym ZSEM',
       html: emailHTML,
     });
@@ -203,7 +203,7 @@ export class AuthService {
     }
     this.mailerService.sendMail({
       to: email,
-      from: 'rekrutacja@sevedev.com',
+      from: process.env.SMTP_USER,
       subject: 'Zmiana hasła w serwisie rekrutacyjnym ZSEM',
       html: emailContent,
     });

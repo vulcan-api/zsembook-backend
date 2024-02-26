@@ -12,7 +12,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import * as process from 'process';
 import { UserModule } from './user/user.module';
 import { OlympicsModule } from './olympics/olympics.module';
-import { OauthModule } from './oauth/oauth.module';
 import { FaqModule } from './faq/faq.module';
 import { SchoolEventModule } from './school-event/school-event.module';
 import { CachingMiddleware } from './middleware/caching.middleware';
@@ -36,13 +35,12 @@ import { CachingMiddleware } from './middleware/caching.middleware';
           },
         },
         defaults: {
-          from: 'Muj Elektryk',
+          from: `"No-Reply" <${process.env.SMTP_USER}>`,
         },
       }),
     }),
     UserModule,
     OlympicsModule,
-    OauthModule,
     FaqModule,
     SchoolEventModule,
   ],
